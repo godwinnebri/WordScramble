@@ -30,9 +30,11 @@ struct ContentView: View {
             }
            
             } //List
+            .navigationTitle(rootWord)
+            .onSubmit (addNewWord)
+            .onAppear(perform: startGame)
         } //Navigation view
-        .navigationTitle(rootWord)
-        .onSubmit (addNewWord)
+        
     } //body
     
     func addNewWord() {
@@ -45,7 +47,19 @@ struct ContentView: View {
             usedWords.insert(answer, at: 0)
         }
         newWord = ""
-    }
+    } //addnewNumber func
+    
+    func startGame() {
+        if let startWordsURL = Bundle.main.url(forResource: "start", withExtension: "txt") {
+            if let startWords = try? String(contentsOf: startWordsURL) {
+                let allWords = startWords.components(separatedBy: "\n")
+                rootWord = allWords.randomElement() ?? "Silkworm"
+                return
+            }
+        } //urnwraping words
+        
+        fatalError("Could not load start.txt from bundle")
+    } //startGame func
 }
 
 struct ContentView_Previews: PreviewProvider {
