@@ -18,30 +18,44 @@ struct ContentView: View {
         
     var body: some View {
         NavigationView {
-        List {
-            Section {
-                TextField("Enter your word", text: $newWord)
-                    .autocapitalization(.none)
-            }
-            
-            Section {
-                ForEach (usedWords, id: \.self) {word in
-                    HStack {
-                        Image(systemName: "\(word.count).circle.fill")
-                        Text(word)
-                    }
+                VStack {
+                    List {
+                        Color.clear
+                            .frame(height: 2)
+                        Section {
+                                TextField("Enter your word", text: $newWord)
+                                    .autocapitalization(.none)
+                                    .autocorrectionDisabled()
+                            //.textFieldStyle(RoundedBorderTextFieldStyle())
+
+                                }
+                        
+                        Section {
+                            ForEach (usedWords, id: \.self) {word in
+                                HStack {
+                                    Image(systemName: "\(word.count).circle.fill")
+                                    Text(word)
+                                }
+                            }
+                        }
+                    } //list
+                    .listStyle(.plain)
+                    Text("Words scrambled: \(usedWords.count)")
+                        .foregroundColor(.green)
+
+                }//Hstack
+                .navigationTitle (rootWord)
+                .onSubmit (addNewWord)
+                .onAppear(perform: startGame)
+                .alert(errorTitle, isPresented: $showingError) {
+                    Button ("OK", role: .cancel) {}
+                } message: {
+                    Text (errorMessage)
                 }
-            }
-           
-            } //List
-            .navigationTitle (rootWord)
-            .onSubmit (addNewWord)
-            .onAppear(perform: startGame)
-            .alert(errorTitle, isPresented: $showingError) {
-                Button ("OK", role: .cancel) {}
-            } message: {
-                Text (errorMessage)
-            }
+                .toolbar{
+                    Button("New word", action: resetWord)
+                }
+            
         } //Navigation view
         
     } //body
@@ -49,6 +63,12 @@ struct ContentView: View {
     func addNewWord() {
         let answer = newWord.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         guard answer.count > 0 else {return}
+        
+        
+        guard isShort(word: answer) else {
+            wordError(title: "Word is too short", message: "Enter a word with at least three characters")
+            return
+        }
         
         guard isOriginal(word: answer) else {
             wordError(title: "Word used already", message: "Be more original")
@@ -62,6 +82,11 @@ struct ContentView: View {
         
         guard isReal(word: answer) else {
             wordError(title: "Word doesn't exist", message: "You know you just can't make words up right 🙄")
+            return
+        }
+        
+        guard isRootWord(word: answer) else {
+            wordError(title: "Word is root word", message: "Your answer cannot be \(rootWord)")
             return
         }
         
@@ -109,12 +134,34 @@ struct ContentView: View {
         return misspelledRange.location == NSNotFound
     } //isReal func
     
+    func isShort (word : String) -> Bool {
+        if word.count < 3{
+            return false
+        }else {
+            return true
+        }
+    } //isShort func
+    
+    func isRootWord (word: String) -> Bool {
+        if word == rootWord {
+            return false
+        } else {
+            return true
+        }
+    } //isRootword func
+    
+    func resetWord() {
+        startGame()
+        usedWords.removeAll()
+    }
+    
     
     func wordError (title : String, message : String) {
         errorTitle = title
         errorMessage = message
         showingError = true
     } //word Error
+    
 }
 
 struct ContentView_Previews: PreviewProvider {
