@@ -19,16 +19,14 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
                 VStack {
-                    List {
-                        Color.clear
-                            .frame(height: 2)
+                    Form {
                         Section {
-                                TextField("Enter your word", text: $newWord)
-                                    .autocapitalization(.none)
-                                    .autocorrectionDisabled()
+                            TextField("Enter your word", text: $newWord)
+                                .autocapitalization(.none)
+                                .autocorrectionDisabled()
                             //.textFieldStyle(RoundedBorderTextFieldStyle())
-
-                                }
+                            
+                        }
                         
                         Section {
                             ForEach (usedWords, id: \.self) {word in
@@ -38,13 +36,16 @@ struct ContentView: View {
                                 }
                             }
                         }
-                    } //list
-                    .listStyle(.plain)
+                    }
+                    
                     Text("Words scrambled: \(usedWords.count)")
                         .foregroundColor(.green)
+                    
+                    Color.clear
+                        .frame(height: 4)
 
                 }//Hstack
-                .navigationTitle (rootWord)
+                .navigationBarTitle (rootWord, displayMode: .large)
                 .onSubmit (addNewWord)
                 .onAppear(perform: startGame)
                 .alert(errorTitle, isPresented: $showingError) {
